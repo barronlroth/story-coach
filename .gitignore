@@ -1,0 +1,15 @@
+.next/
+node_modules/
+out/
+dist/
+coverage/
+playwright-report/
+test-results/
+.env
+.env.local
+.env.*.local
+.vercel/
+.turbo/
+.DS_Store
+*.log
+public/generated/sessions/
