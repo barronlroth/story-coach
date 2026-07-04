@@ -60,6 +60,45 @@ describe("generateCodexImage", () => {
     expect(imageContent).not.toHaveProperty("metadata");
   });
 
+  it("converts local app image URLs to data URLs before calling Codex", async () => {
+    const createResponse = vi.fn().mockResolvedValue({
+      image_b64: "iVBORw0KGgo-streamed",
+    });
+
+    await generateCodexImage(
+      {
+        intent: "regenerate",
+        beat: {
+          beatId: "special",
+          prompt: "Draw what makes them special",
+          drawingImageUrl: "/generated/demo/main-character.png",
+          transcript: "Mira has a backpack.",
+          correctionTranscripts: [],
+        },
+        previousAcceptedImages: [
+          {
+            beatId: "main-character",
+            imageUrl: "/generated/demo/main-character.png",
+          },
+        ],
+      },
+      {
+        client: { createResponse },
+      },
+    );
+
+    const content = (
+      createResponse.mock.calls[0][0].input as {
+        content: Record<string, unknown>[];
+      }[]
+    )[0].content;
+    const imageContents = content.filter((item) => item.type === "input_image");
+
+    expect(imageContents).toHaveLength(2);
+    expect(imageContents[0].image_url).toEqual(expect.stringMatching(/^data:image\/png;base64,/));
+    expect(imageContents[1].image_url).toEqual(expect.stringMatching(/^data:image\/png;base64,/));
+  });
+
   it("accepts promoted streamed image base64 responses", async () => {
     const createResponse = vi.fn().mockResolvedValue({
       image_b64: "iVBORw0KGgo-streamed",

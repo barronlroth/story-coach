@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import {
   createCodexResponsesClient,
   type CodexResponsesClient,
@@ -60,6 +62,61 @@ function buildProviderContent(
       detail: "auto",
     })),
   ];
+}
+
+function mimeTypeForPath(filePath: string): string {
+  const extension = path.extname(filePath).toLowerCase();
+
+  if (extension === ".jpg" || extension === ".jpeg") {
+    return "image/jpeg";
+  }
+
+  if (extension === ".webp") {
+    return "image/webp";
+  }
+
+  return "image/png";
+}
+
+async function localPublicImageToDataUrl(imageUrl: string): Promise<string | undefined> {
+  if (!imageUrl.startsWith("/")) {
+    return imageUrl;
+  }
+
+  const relativePath = imageUrl.replace(/^\/+/, "");
+
+  if (relativePath.includes("..")) {
+    return undefined;
+  }
+
+  const filePath = path.join(process.cwd(), "public", relativePath);
+
+  try {
+    const imageBuffer = await readFile(filePath);
+
+    return `data:${mimeTypeForPath(filePath)};base64,${imageBuffer.toString("base64")}`;
+  } catch {
+    return undefined;
+  }
+}
+
+async function normalizeProviderImageReferences(
+  builtPrompt: BuiltImageGenerationPrompt,
+): Promise<BuiltImageGenerationPrompt> {
+  const imageReferences = (
+    await Promise.all(
+      builtPrompt.imageReferences.map(async (reference) => {
+        const dataUrl = await localPublicImageToDataUrl(reference.url);
+
+        return dataUrl ? { ...reference, url: dataUrl } : undefined;
+      }),
+    )
+  ).filter((reference): reference is ImagePromptReference => Boolean(reference));
+
+  return {
+    ...builtPrompt,
+    imageReferences,
+  };
 }
 
 function buildCodexImagePayload(
@@ -164,7 +221,9 @@ export async function generateCodexImage(
   options: CodexImageGenerationOptions = {},
 ): Promise<CodexImageGenerationResult> {
   const env = options.env ?? process.env;
-  const builtPrompt = input.builtPrompt ?? buildImageGenerationPrompt(input);
+  const builtPrompt = await normalizeProviderImageReferences(
+    input.builtPrompt ?? buildImageGenerationPrompt(input),
+  );
   const client = options.client ?? createCodexResponsesClient(undefined, env);
   const payload = buildCodexImagePayload(input, builtPrompt, env);
   const providerResponse = await client.createResponse(payload);
