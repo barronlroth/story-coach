@@ -98,3 +98,105 @@ export function getNextStepAfterGeneration(): BeatStep {
 export function getNextBeatStep(nextBeat: StoryBeatState): BeatStep {
   return nextBeat.mode === "describe" ? "describe" : "draw";
 }
+
+function touch(session: StorySessionState, now = new Date()): StorySessionState {
+  return {
+    ...session,
+    updatedAt: now.toISOString(),
+  };
+}
+
+function updateCurrentBeat(
+  session: StorySessionState,
+  update: (beat: StoryBeatState) => StoryBeatState,
+  now = new Date(),
+): StorySessionState {
+  return touch(
+    {
+      ...session,
+      beats: session.beats.map((beat, index) =>
+        index === session.currentBeatIndex ? update(beat) : beat,
+      ),
+    },
+    now,
+  );
+}
+
+export function saveCurrentBeatDrawing(
+  session: StorySessionState,
+  drawingImageUrl: string,
+  now?: Date,
+): StorySessionState {
+  return {
+    ...updateCurrentBeat(session, (beat) => ({ ...beat, drawingImageUrl }), now),
+    currentStep: getNextStepAfterDrawing(getCurrentBeat(session)),
+  };
+}
+
+export function saveCurrentBeatTranscript(
+  session: StorySessionState,
+  transcript: string,
+  now?: Date,
+): StorySessionState {
+  return {
+    ...updateCurrentBeat(session, (beat) => ({ ...beat, transcript }), now),
+    currentStep: getNextStepAfterDescription(),
+  };
+}
+
+export function saveCurrentBeatGeneratedImage(
+  session: StorySessionState,
+  generatedImageUrl: string,
+  now?: Date,
+): StorySessionState {
+  return {
+    ...updateCurrentBeat(session, (beat) => ({ ...beat, generatedImageUrl }), now),
+    currentStep: getNextStepAfterGeneration(),
+  };
+}
+
+export function addCorrectionTranscript(
+  session: StorySessionState,
+  correctionTranscript: string,
+  now?: Date,
+): StorySessionState {
+  return {
+    ...updateCurrentBeat(
+      session,
+      (beat) => ({
+        ...beat,
+        correctionTranscripts: [...beat.correctionTranscripts, correctionTranscript],
+      }),
+      now,
+    ),
+    currentStep: "generating",
+  };
+}
+
+export function requestCorrection(session: StorySessionState, now?: Date): StorySessionState {
+  return touch({ ...session, currentStep: "correction" }, now);
+}
+
+export function requestRegeneration(session: StorySessionState, now?: Date): StorySessionState {
+  return touch({ ...session, currentStep: "generating" }, now);
+}
+
+export function acceptCurrentBeat(session: StorySessionState, now?: Date): StorySessionState {
+  const acceptedSession = updateCurrentBeat(session, (beat) => ({ ...beat, accepted: true }), now);
+
+  if (!canAdvanceToNextBeat(acceptedSession)) {
+    return touch({ ...acceptedSession, currentStep: "confirm" }, now);
+  }
+
+  const currentBeatIndex = acceptedSession.currentBeatIndex + 1;
+  const nextBeat = acceptedSession.beats[currentBeatIndex];
+
+  return touch(
+    {
+      ...acceptedSession,
+      currentBeatIndex,
+      currentStep: getNextBeatStep(nextBeat),
+    },
+    now,
+  );
+}
