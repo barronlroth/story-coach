@@ -4,13 +4,13 @@ import path from "node:path";
 
 export type PersistGeneratedImageOptions = {
   beatId: string;
-  publicRoot?: string;
-  directory?: string;
   now?: Date;
   uuid?: string;
 };
 
 const DATA_IMAGE_PATTERN = /^data:image\/(png|jpeg|jpg|webp);base64,([A-Za-z0-9+/=\s]+)$/;
+const SESSION_IMAGE_PUBLIC_DIRECTORY = "/generated/sessions";
+const SESSION_IMAGE_OUTPUT_DIRECTORY = path.join(process.cwd(), "public", "generated", "sessions");
 
 function extensionForImageType(imageType: string): string {
   return imageType === "jpeg" ? "jpg" : imageType;
@@ -36,18 +36,15 @@ export async function persistGeneratedImageUrl(
   }
 
   const [, imageType, base64] = match;
-  const directory = options.directory ?? "generated/sessions";
-  const publicRoot = options.publicRoot ?? path.join(process.cwd(), "public");
   const timestamp = (options.now ?? new Date()).toISOString().replace(/[:.]/g, "-");
   const uuid = options.uuid ?? randomUUID();
   const extension = extensionForImageType(imageType);
   const fileName = `${timestamp}-${safeFileSegment(options.beatId)}-${uuid}.${extension}`;
-  const outputDirectory = path.join(publicRoot, directory);
-  const outputPath = path.join(outputDirectory, fileName);
+  const outputPath = path.join(SESSION_IMAGE_OUTPUT_DIRECTORY, fileName);
   const imageBuffer = Buffer.from(base64.replace(/\s/g, ""), "base64");
 
-  await mkdir(outputDirectory, { recursive: true });
+  await mkdir(SESSION_IMAGE_OUTPUT_DIRECTORY, { recursive: true });
   await writeFile(outputPath, imageBuffer);
 
-  return `/${directory}/${fileName}`;
+  return `${SESSION_IMAGE_PUBLIC_DIRECTORY}/${fileName}`;
 }
