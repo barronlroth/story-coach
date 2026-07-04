@@ -7,12 +7,24 @@ import {
 } from "@/lib/ai/codexResponsesClient";
 
 describe("createCodexResponsesClient", () => {
-  it("posts to the default Codex endpoint with a server-side bearer token", async () => {
+  it("posts a streaming request to the default Codex endpoint with a server-side bearer token", async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
-      new Response(JSON.stringify({ output_text: "ok" }), {
+      new Response(
+        [
+          "event: response.output_text.delta",
+          'data: {"type":"response.output_text.delta","delta":"{\\"ok\\""}',
+          "",
+          "event: response.output_text.done",
+          'data: {"type":"response.output_text.done","text":"{\\"ok\\":true}"}',
+          "",
+          "event: response.completed",
+          'data: {"type":"response.completed","response":{"status":"completed"}}',
+          "",
+        ].join("\n"),
+        {
         status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
+        },
+      ),
     );
     const client = createCodexResponsesClient(
       {
@@ -23,8 +35,11 @@ describe("createCodexResponsesClient", () => {
       },
     );
 
-    await expect(client.createResponse({ model: "gpt-5.4", store: false })).resolves.toEqual({
-      output_text: "ok",
+    await expect(client.createResponse({ model: "gpt-5.4", store: false })).resolves.toMatchObject({
+      output_text: "{\"ok\":true}",
+      response: {
+        status: "completed",
+      },
     });
 
     expect(fetchFn).toHaveBeenCalledWith(
@@ -32,8 +47,14 @@ describe("createCodexResponsesClient", () => {
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
+          Accept: "text/event-stream",
           Authorization: "Bearer server-only-token",
           "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({
+          model: "gpt-5.4",
+          store: false,
+          stream: true,
         }),
       }),
     );
