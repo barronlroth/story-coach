@@ -917,7 +917,8 @@ Prompt requirements:
 Recommended implementation:
 
 - Use the Codex Responses endpoint from a server-only module.
-- Keep streaming optional; non-streaming is simpler for MVP.
+- Use streaming requests for the Hermes-style Codex backend. A live probe on July 4, 2026 returned `400` until `stream: true` was set.
+- Keep SSE parsing hidden inside `codexResponsesClient.ts`; app routes should receive a normal parsed payload.
 - Add retry and JSON repair only if needed.
 - Keep a stub writer available for demos.
 
@@ -954,6 +955,8 @@ input:
 ```
 
 The exact payload should be hidden behind `codexImageGeneration.ts`.
+
+The Codex Responses transport detail should still be owned by `codexResponsesClient.ts`. Image generation callers should not parse SSE events directly; they should receive an extracted image URL or data URL.
 
 Image generation must support three intents:
 
