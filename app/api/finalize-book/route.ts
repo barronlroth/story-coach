@@ -45,7 +45,7 @@ function parseBeats(body: FinalizeBookRequest): StoryBeatState[] {
 }
 
 async function writeFinalBook(beats: StoryBeatState[]): Promise<FinalBook> {
-  if (process.env.STORY_WRITER_PROVIDER === "codex") {
+  if (process.env.STORY_COACH_STORY_PROVIDER === "codex" || process.env.STORY_WRITER_PROVIDER === "codex") {
     return writeFinalBookWithCodex(beats);
   }
 

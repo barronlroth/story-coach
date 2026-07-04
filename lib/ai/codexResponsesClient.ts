@@ -1,4 +1,6 @@
-import { resolveCodexAuth } from "@/lib/ai/codexAuth";
+import { resolveCodexAuth, type CodexAuthEnv } from "@/lib/ai/codexAuth";
+
+export const DEFAULT_CODEX_RESPONSES_ENDPOINT = "https://chatgpt.com/backend-api/codex/responses";
 
 export class CodexResponsesConfigurationError extends Error {
   constructor(message: string) {
@@ -24,21 +26,15 @@ export type CodexResponsesClient = {
   createResponse(payload: Record<string, unknown>): Promise<unknown>;
 };
 
-function resolveEndpointUrl(env: NodeJS.ProcessEnv): string {
+function resolveEndpointUrl(env: CodexAuthEnv): string {
   const endpointUrl = env.STORY_COACH_CODEX_RESPONSES_URL?.trim() || env.CODEX_RESPONSES_URL?.trim();
 
-  if (!endpointUrl) {
-    throw new CodexResponsesConfigurationError(
-      "Codex Responses endpoint is not configured. Set STORY_COACH_CODEX_RESPONSES_URL on the server, or use the stub image provider.",
-    );
-  }
-
-  return endpointUrl;
+  return endpointUrl || DEFAULT_CODEX_RESPONSES_ENDPOINT;
 }
 
 export function createCodexResponsesClient(
   config?: Partial<CodexResponsesClientConfig>,
-  env: NodeJS.ProcessEnv = process.env,
+  env: CodexAuthEnv = process.env,
 ): CodexResponsesClient {
   const auth = config?.accessToken
     ? { accessToken: config.accessToken }

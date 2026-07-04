@@ -5,9 +5,14 @@ const ENV_KEYS = [
   "STORY_COACH_IMAGE_PROVIDER",
   "STORY_COACH_CODEX_ACCESS_TOKEN",
   "CODEX_ACCESS_TOKEN",
+  "STORY_COACH_CODEX_AUTH_PATH",
+  "CODEX_AUTH_PATH",
+  "CODEX_HOME",
   "STORY_COACH_CODEX_RESPONSES_URL",
   "CODEX_RESPONSES_URL",
   "STORY_COACH_CODEX_RESPONSE_MODEL",
+  "STORY_COACH_CODEX_IMAGE_RESPONSE_MODEL",
+  "STORY_COACH_CODEX_IMAGE_MODEL",
 ] as const;
 
 const originalEnv = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
@@ -31,6 +36,13 @@ function generateImageRequest(body: unknown): Request {
     },
     body: JSON.stringify(body),
   });
+}
+
+function fakeExpiredJwt(suffix: string): string {
+  const header = Buffer.from(JSON.stringify({ alg: "none", typ: "JWT" })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({ exp: 1 })).toString("base64url");
+
+  return `${header}.${payload}.${suffix}`;
 }
 
 describe("POST /api/generate-image", () => {
@@ -85,7 +97,7 @@ describe("POST /api/generate-image", () => {
 
   it("does not expose configured tokens when Codex is selected but incomplete", async () => {
     process.env.STORY_COACH_IMAGE_PROVIDER = "codex";
-    process.env.STORY_COACH_CODEX_ACCESS_TOKEN = "secret-token-that-must-not-leak";
+    process.env.STORY_COACH_CODEX_ACCESS_TOKEN = fakeExpiredJwt("secret-token-that-must-not-leak");
 
     const response = await POST(
       generateImageRequest({

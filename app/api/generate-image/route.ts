@@ -7,6 +7,7 @@ import {
   CodexResponsesConfigurationError,
   CodexResponsesRequestError,
 } from "@/lib/ai/codexResponsesClient";
+import { persistGeneratedImageUrl } from "@/lib/ai/generatedImageStorage";
 import { generateImageStub } from "@/lib/ai/imageGenerationStub";
 import {
   buildImageGenerationPrompt,
@@ -187,8 +188,11 @@ export async function POST(request: Request): Promise<Response> {
       imageProvider(process.env) === "codex"
         ? await generateCodexImage({ ...promptInput, builtPrompt })
         : await generateImageStub({ ...promptInput, builtPrompt });
+    const imageUrl = await persistGeneratedImageUrl(result.imageUrl, {
+      beatId: parsed.request.beat.beatId,
+    });
 
-    return jsonResponse({ imageUrl: result.imageUrl } satisfies GenerateImageResponse);
+    return jsonResponse({ imageUrl } satisfies GenerateImageResponse);
   } catch (error) {
     return responseForError(error);
   }

@@ -2,6 +2,7 @@ import {
   createCodexResponsesClient,
   type CodexResponsesClient,
 } from "@/lib/ai/codexResponsesClient";
+import type { CodexAuthEnv } from "@/lib/ai/codexAuth";
 import {
   buildImageGenerationPrompt,
   type BuildImageGenerationPromptInput,
@@ -33,19 +34,16 @@ export type CodexImageGenerationResult = {
 
 export type CodexImageGenerationOptions = {
   client?: CodexResponsesClient;
-  env?: NodeJS.ProcessEnv;
+  env?: CodexAuthEnv;
 };
 
-function resolveRequiredEnv(name: string, env: NodeJS.ProcessEnv): string {
-  const value = env[name]?.trim();
-
-  if (!value) {
-    throw new CodexImageGenerationConfigurationError(
-      `${name} is required for Codex image generation. Use STORY_COACH_IMAGE_PROVIDER=stub for local demo mode.`,
-    );
-  }
-
-  return value;
+function resolveResponseModel(env: CodexAuthEnv): string {
+  return (
+    env.STORY_COACH_CODEX_IMAGE_RESPONSE_MODEL?.trim() ||
+    env.STORY_COACH_CODEX_RESPONSE_MODEL?.trim() ||
+    env.CODEX_STORY_WRITER_MODEL?.trim() ||
+    "gpt-5.4"
+  );
 }
 
 function buildProviderContent(
@@ -71,13 +69,14 @@ function buildProviderContent(
 function buildCodexImagePayload(
   input: CodexImageGenerationInput,
   builtPrompt: BuiltImageGenerationPrompt,
-  env: NodeJS.ProcessEnv,
+  env: CodexAuthEnv,
 ): Record<string, unknown> {
-  const responseModel = resolveRequiredEnv("STORY_COACH_CODEX_RESPONSE_MODEL", env);
+  const responseModel = resolveResponseModel(env);
   const imageModel = env.STORY_COACH_CODEX_IMAGE_MODEL?.trim() || "gpt-image-2";
 
   return {
     model: responseModel,
+    store: false,
     tools: [
       {
         type: "image_generation",

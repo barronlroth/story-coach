@@ -1,11 +1,10 @@
+import {
+  createCodexResponsesClient,
+  type CodexResponsesClient,
+} from "@/lib/ai/codexResponsesClient";
+import type { CodexAuthEnv } from "@/lib/ai/codexAuth";
 import { buildFinalBookPrompt, FINAL_BOOK_JSON_SCHEMA } from "@/lib/prompts/finalBookPrompt";
 import type { FinalBook, StoryBeatState } from "@/lib/story-state";
-
-type CodexStoryWriterConfig = {
-  accessToken: string;
-  endpoint: string;
-  model: string;
-};
 
 type CodexFinalBookPage = {
   pageNumber: number;
@@ -19,7 +18,10 @@ type CodexFinalBookPayload = {
   narrationText: string;
 };
 
-const DEFAULT_CODEX_RESPONSES_ENDPOINT = "https://chatgpt.com/backend-api/codex/responses";
+export type CodexStoryWriterOptions = {
+  client?: CodexResponsesClient;
+  env?: CodexAuthEnv;
+};
 
 function assertServerOnly(): void {
   if (typeof window !== "undefined") {
@@ -27,21 +29,13 @@ function assertServerOnly(): void {
   }
 }
 
-function getConfig(): CodexStoryWriterConfig {
-  const accessToken = process.env.CODEX_ACCESS_TOKEN;
-  const model = process.env.CODEX_STORY_WRITER_MODEL;
-
-  if (!accessToken || !model) {
-    throw new Error(
-      "Codex story writer is not configured. Set CODEX_ACCESS_TOKEN and CODEX_STORY_WRITER_MODEL, or use the local stub writer.",
-    );
-  }
-
-  return {
-    accessToken,
-    model,
-    endpoint: process.env.CODEX_RESPONSES_ENDPOINT ?? DEFAULT_CODEX_RESPONSES_ENDPOINT,
-  };
+function resolveStoryWriterModel(env: CodexAuthEnv): string {
+  return (
+    env.STORY_COACH_CODEX_STORY_MODEL?.trim() ||
+    env.CODEX_STORY_WRITER_MODEL?.trim() ||
+    env.STORY_COACH_CODEX_RESPONSE_MODEL?.trim() ||
+    "gpt-5.4"
+  );
 }
 
 function textFromContentItem(item: unknown): string {
@@ -140,45 +134,38 @@ function imageUrlForBeat(beats: StoryBeatState[], beatId: string): string {
   return beat?.accepted && beat.generatedImageUrl ? beat.generatedImageUrl : "";
 }
 
-export async function writeFinalBookWithCodex(beats: StoryBeatState[]): Promise<FinalBook> {
+export async function writeFinalBookWithCodex(
+  beats: StoryBeatState[],
+  options: CodexStoryWriterOptions = {},
+): Promise<FinalBook> {
   assertServerOnly();
 
-  const config = getConfig();
+  const env = options.env ?? process.env;
+  const model = resolveStoryWriterModel(env);
+  const client = options.client ?? createCodexResponsesClient(undefined, env);
   const prompt = buildFinalBookPrompt(beats);
-  const response = await fetch(config.endpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: config.model,
-      input: [
-        {
-          role: "system",
-          content: [{ type: "input_text", text: prompt.system }],
-        },
-        {
-          role: "user",
-          content: [{ type: "input_text", text: prompt.user }],
-        },
-      ],
-      text: {
-        format: {
-          type: "json_schema",
-          name: "final_book",
-          schema: FINAL_BOOK_JSON_SCHEMA,
-          strict: true,
-        },
+  const rawPayload = await client.createResponse({
+    model,
+    store: false,
+    input: [
+      {
+        role: "system",
+        content: [{ type: "input_text", text: prompt.system }],
       },
-    }),
+      {
+        role: "user",
+        content: [{ type: "input_text", text: prompt.user }],
+      },
+    ],
+    text: {
+      format: {
+        type: "json_schema",
+        name: "final_book",
+        schema: FINAL_BOOK_JSON_SCHEMA,
+        strict: true,
+      },
+    },
   });
-
-  if (!response.ok) {
-    throw new Error(`Codex story writer request failed with ${response.status}.`);
-  }
-
-  const rawPayload: unknown = await response.json();
   const text = extractTextFromCodexResponse(rawPayload);
 
   if (!text) {
