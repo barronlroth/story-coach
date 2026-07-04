@@ -58,10 +58,6 @@ function buildProviderContent(
       type: "input_image",
       image_url: reference.url,
       detail: "auto",
-      metadata: {
-        kind: reference.kind,
-        beatId: reference.beatId,
-      },
     })),
   ];
 }
@@ -89,12 +85,6 @@ function buildCodexImagePayload(
         content: buildProviderContent(builtPrompt),
       },
     ],
-    metadata: {
-      app: "story-coach",
-      beatId: input.beat.beatId,
-      intent: input.intent,
-      imageReferenceCount: builtPrompt.imageReferences.length,
-    },
   };
 }
 
@@ -142,7 +132,7 @@ function extractImageUrl(response: unknown): string | undefined {
   }
 
   if (isRecord(response)) {
-    for (const key of ["imageUrl", "image_url", "url", "b64_json", "result"]) {
+    for (const key of ["imageUrl", "image_url", "url", "b64_json", "image_b64", "partial_image_b64", "result"]) {
       const value = response[key];
       if (typeof value === "string") {
         const imageUrl = normalizeImageString(value);

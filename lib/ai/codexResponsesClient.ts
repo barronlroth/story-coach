@@ -44,6 +44,7 @@ function parseCodexEventStream(value: string): unknown {
   const events: unknown[] = [];
   const doneTexts: string[] = [];
   const deltaTexts: string[] = [];
+  const imageBase64Values: string[] = [];
   let completedResponse: unknown;
 
   for (const eventBlock of value.split(/\r?\n\r?\n/)) {
@@ -62,7 +63,6 @@ function parseCodexEventStream(value: string): unknown {
     }
 
     const event = parsed as Record<string, unknown>;
-    events.push(event);
 
     if (event.type === "response.output_text.done" && typeof event.text === "string") {
       doneTexts.push(event.text);
@@ -72,15 +72,29 @@ function parseCodexEventStream(value: string): unknown {
       deltaTexts.push(event.delta);
     }
 
+    if (event.type === "response.image_generation_call.partial_image" && typeof event.partial_image_b64 === "string") {
+      imageBase64Values.push(event.partial_image_b64);
+    }
+
     if (event.type === "response.completed") {
       completedResponse = event.response;
     }
+
+    events.push(
+      typeof event.partial_image_b64 === "string"
+        ? {
+            ...event,
+            partial_image_b64: "[image omitted]",
+          }
+        : event,
+    );
   }
 
   const outputText = doneTexts.length > 0 ? doneTexts.join("\n") : deltaTexts.join("");
 
   return {
     output_text: outputText,
+    image_b64: imageBase64Values.at(-1),
     response: completedResponse,
     events,
   };

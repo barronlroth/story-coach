@@ -194,6 +194,7 @@ export async function POST(request: Request): Promise<Response> {
 
     return jsonResponse({ imageUrl } satisfies GenerateImageResponse);
   } catch (error) {
+    console.error("[Story Coach] Image generation provider failure", error);
     return responseForError(error);
   }
 }

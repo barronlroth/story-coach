@@ -59,4 +59,42 @@ describe("createCodexResponsesClient", () => {
       }),
     );
   });
+
+  it("promotes streamed image chunks into an image_b64 response field", async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        [
+          "event: response.image_generation_call.partial_image",
+          'data: {"type":"response.image_generation_call.partial_image","partial_image_b64":"iVBOR-first"}',
+          "",
+          "event: response.image_generation_call.partial_image",
+          'data: {"type":"response.image_generation_call.partial_image","partial_image_b64":"iVBOR-final"}',
+          "",
+        ].join("\n"),
+        {
+          status: 200,
+        },
+      ),
+    );
+    const client = createCodexResponsesClient(
+      {
+        fetchFn,
+      },
+      {
+        STORY_COACH_CODEX_ACCESS_TOKEN: "server-only-token",
+      },
+    );
+
+    await expect(client.createResponse({ model: "gpt-5.4" })).resolves.toMatchObject({
+      image_b64: "iVBOR-final",
+      events: [
+        {
+          partial_image_b64: "[image omitted]",
+        },
+        {
+          partial_image_b64: "[image omitted]",
+        },
+      ],
+    });
+  });
 });
