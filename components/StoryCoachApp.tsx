@@ -64,14 +64,6 @@ export function StoryCoachApp() {
     () => session.beats.filter((beat) => beat.accepted).map((beat) => beat.beatId),
     [session.beats],
   );
-  const previousAcceptedImages = useMemo(
-    () =>
-      session.beats
-        .filter((beat) => beat.accepted && beat.generatedImageUrl)
-        .map((beat) => ({ beatId: beat.beatId, imageUrl: beat.generatedImageUrl as string })),
-    [session.beats],
-  );
-
   function updateSession(updater: (current: StorySessionState) => StorySessionState) {
     setSession((current) => updater(current));
   }
@@ -98,13 +90,16 @@ export function StoryCoachApp() {
     setErrorMessage("");
   }
 
-  async function generateImage(intent: "first_generation" | "correction" | "regenerate") {
+  async function generateImage(
+    intent: "first_generation" | "correction" | "regenerate",
+    sourceSession: StorySessionState = session,
+  ) {
     resetError();
     setIsBusy(true);
-    updateSession((current) => ({ ...current, currentStep: "generating" }));
+    setSession({ ...sourceSession, currentStep: "generating" });
 
     try {
-      const beat = getCurrentBeat(session);
+      const beat = getCurrentBeat(sourceSession);
       const response = await fetch("/api/generate-image", {
         method: "POST",
         headers: {
@@ -112,7 +107,7 @@ export function StoryCoachApp() {
         },
         body: JSON.stringify({
           beat,
-          previousAcceptedImages,
+          previousAcceptedImages: getPreviousAcceptedImages(sourceSession),
           intent,
         }),
       });
@@ -141,8 +136,9 @@ export function StoryCoachApp() {
   }
 
   function handleTranscript(transcript: string) {
-    updateSession((current) => saveCurrentBeatTranscript(current, transcript));
-    void generateImage("first_generation");
+    const nextSession = saveCurrentBeatTranscript(session, transcript);
+    setSession(nextSession);
+    void generateImage("first_generation", nextSession);
   }
 
   function handleLooksRight() {
@@ -196,13 +192,15 @@ export function StoryCoachApp() {
   }
 
   function handleSubmitDetail(detail: string) {
-    updateSession((current) => addCorrectionTranscript(current, detail));
-    void generateImage("correction");
+    const nextSession = addCorrectionTranscript(session, detail);
+    setSession(nextSession);
+    void generateImage("correction", nextSession);
   }
 
   function handleTryAgain() {
-    updateSession((current) => requestRegeneration(current));
-    void generateImage("regenerate");
+    const nextSession = requestRegeneration(session);
+    setSession(nextSession);
+    void generateImage("regenerate", nextSession);
   }
 
   function renderStoryStep() {
@@ -363,6 +361,12 @@ export function StoryCoachApp() {
       </section>
     </main>
   );
+}
+
+function getPreviousAcceptedImages(sourceSession: StorySessionState) {
+  return sourceSession.beats
+    .filter((beat) => beat.accepted && beat.generatedImageUrl)
+    .map((beat) => ({ beatId: beat.beatId, imageUrl: beat.generatedImageUrl as string }));
 }
 
 type DescribeStepProps = {

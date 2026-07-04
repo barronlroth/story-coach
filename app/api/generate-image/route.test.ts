@@ -59,7 +59,7 @@ describe("POST /api/generate-image", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual({
-      imageUrl: "/storyboard/04-step-1d-confirm-character.png",
+      imageUrl: "/generated/demo/main-character.png",
     });
   });
 
