@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --background-paper: #f8efd7;
+  --surface-paper: #fff8e8;
+  --surface-paper-deep: #f3dfb8;
+  --ink-primary: #2f2a22;
+  --ink-soft: #76624c;
+  --accent-sun: #f6c94c;
+  --accent-sky: #83c8f2;
+  --accent-coral: #ef836f;
+  --accent-leaf: #73b970;
+  --accent-plum: #8b6fb4;
+  --border-paper: #dac49b;
+  --shadow-paper: 0 18px 48px rgba(78, 56, 28, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.55), transparent 28rem),
+    linear-gradient(135deg, #f9f1d8 0%, #f5e3bd 54%, #eacb9a 100%);
+  color: var(--ink-primary);
+  font-family:
+    ui-rounded,
+    "Avenir Next",
+    "Nunito",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
