@@ -66,4 +66,28 @@ describe("StoryCoachApp", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("Use your voice or type it in. Messy details are welcome.")).not.toBeInTheDocument();
   });
+
+  it("stacks all accepted story images when generating a describe-only section", async () => {
+    const session = createSeedSession();
+
+    window.localStorage.setItem(
+      STORY_SESSION_STORAGE_KEY,
+      JSON.stringify({
+        ...session,
+        currentBeatIndex: 2,
+        currentStep: "generating",
+        beats: session.beats.map((beat, index) => ({
+          ...beat,
+          accepted: index < 2,
+          generatedImageUrl: index === 2 ? undefined : beat.generatedImageUrl,
+        })),
+      }),
+    );
+
+    render(<StoryCoachApp />);
+
+    expect(await screen.findByText("Making your picture...")).toBeInTheDocument();
+    expect(screen.getByAltText("Main Character picture")).toBeInTheDocument();
+    expect(screen.getByAltText("What Makes Them Special picture")).toBeInTheDocument();
+  });
 });

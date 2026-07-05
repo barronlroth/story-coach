@@ -2,12 +2,14 @@
 
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import { cx, storyCoachTreatments } from "@/lib/design-tokens";
+import { StoryImageStack, type StoryImageStackItem } from "@/components/StoryImageStack";
 
 type RetryStateProps = {
   title?: string;
   message?: string;
   drawingImageUrl?: string;
   drawingImageAlt?: string;
+  storyImages?: StoryImageStackItem[];
   posterLabel?: string;
   safeNote?: string;
   retryLabel?: string;
@@ -23,6 +25,7 @@ export function RetryState({
   message = "Let's try that part again",
   drawingImageUrl,
   drawingImageAlt = "Your drawing",
+  storyImages = [],
   posterLabel = "Your drawing",
   safeNote = "Your drawing is still here.",
   retryLabel = "Try again",
@@ -71,21 +74,25 @@ export function RetryState({
         <div className="rotate-[-3deg] rounded-[8px] bg-[var(--accent-sun)] px-5 py-4 text-center text-xl font-black shadow-[0_12px_22px_rgba(78,56,28,0.18)]">
           {safeNote}
         </div>
-        <div className="relative rotate-[2deg]">
-          <span className={cx(storyCoachTreatments.tapeStrip, "left-1/2 top-[-14px] z-20 -translate-x-1/2 rotate-[2deg]")} aria-hidden="true" />
-          <span className={cx(storyCoachTreatments.pin, "left-3 top-[-8px] z-20 bg-[var(--accent-leaf)]")} aria-hidden="true" />
-          <span className={cx(storyCoachTreatments.pin, "right-3 top-[-8px] z-20 bg-[var(--accent-coral)]")} aria-hidden="true" />
-          <div className={storyCoachTreatments.pinnedLandscapePaper}>
-            {drawingImageUrl ? (
-              <img src={drawingImageUrl} alt={drawingImageAlt} className="h-full w-full object-contain" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-white text-lg font-black text-[var(--ink-soft)]">
-                {posterLabel}
-              </div>
-            )}
+        {storyImages.length > 0 ? (
+          <StoryImageStack images={storyImages} caption={posterLabel} className="rotate-[2deg]" />
+        ) : (
+          <div className="relative rotate-[2deg]">
+            <span className={cx(storyCoachTreatments.tapeStrip, "left-1/2 top-[-14px] z-20 -translate-x-1/2 rotate-[2deg]")} aria-hidden="true" />
+            <span className={cx(storyCoachTreatments.pin, "left-3 top-[-8px] z-20 bg-[var(--accent-leaf)]")} aria-hidden="true" />
+            <span className={cx(storyCoachTreatments.pin, "right-3 top-[-8px] z-20 bg-[var(--accent-coral)]")} aria-hidden="true" />
+            <div className={storyCoachTreatments.pinnedLandscapePaper}>
+              {drawingImageUrl ? (
+                <img src={drawingImageUrl} alt={drawingImageAlt} className="h-full w-full object-contain" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-white text-lg font-black text-[var(--ink-soft)]">
+                  {posterLabel}
+                </div>
+              )}
+            </div>
+            <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">{posterLabel}</p>
           </div>
-          <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">{posterLabel}</p>
-        </div>
+        )}
       </div>
     </section>
   );

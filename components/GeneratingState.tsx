@@ -1,11 +1,13 @@
 import { Sparkles } from "lucide-react";
 import { cx, storyCoachTreatments } from "@/lib/design-tokens";
+import { StoryImageStack, type StoryImageStackItem } from "@/components/StoryImageStack";
 
 type GeneratingStateProps = {
   title?: string;
   subtitle?: string;
   drawingImageUrl?: string;
   drawingAlt?: string;
+  storyImages?: StoryImageStackItem[];
   posterLabel?: string;
   note?: string;
   className?: string;
@@ -16,10 +18,13 @@ export function GeneratingState({
   subtitle = "Using your drawing and your words",
   drawingImageUrl,
   drawingAlt = "Your drawing",
+  storyImages = [],
   posterLabel = "Your drawing",
   note = "This may take a few seconds",
   className,
 }: GeneratingStateProps) {
+  const hasStoryStack = storyImages.length > 0;
+
   return (
     <section
       aria-busy="true"
@@ -30,19 +35,23 @@ export function GeneratingState({
         className,
       )}
     >
-      <div className="relative self-center rotate-[-2deg]">
-        <span className={cx(storyCoachTreatments.pin, "left-5 top-[-10px] z-20 bg-[#2578d8]")} aria-hidden="true" />
-        <div className={storyCoachTreatments.pinnedLandscapePaper}>
-          {drawingImageUrl ? (
-            <img src={drawingImageUrl} alt={drawingAlt} className="h-full w-full object-contain" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-white text-lg font-black text-[var(--ink-soft)]">
-              {posterLabel}
-            </div>
-          )}
+      {hasStoryStack ? (
+        <StoryImageStack images={storyImages} caption={posterLabel} className="self-center rotate-[-2deg]" />
+      ) : (
+        <div className="relative self-center rotate-[-2deg]">
+          <span className={cx(storyCoachTreatments.pin, "left-5 top-[-10px] z-20 bg-[#2578d8]")} aria-hidden="true" />
+          <div className={storyCoachTreatments.pinnedLandscapePaper}>
+            {drawingImageUrl ? (
+              <img src={drawingImageUrl} alt={drawingAlt} className="h-full w-full object-contain" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-white text-lg font-black text-[var(--ink-soft)]">
+                {posterLabel}
+              </div>
+            )}
+          </div>
+          <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">{posterLabel}</p>
         </div>
-        <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">{posterLabel}</p>
-      </div>
+      )}
 
       <div className="flex flex-col items-center justify-center text-center">
         <span className="rounded-full bg-[var(--accent-sky)]/45 px-5 py-2 text-lg font-black text-[var(--ink-primary)] shadow-sm">

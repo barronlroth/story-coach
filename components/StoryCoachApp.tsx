@@ -11,6 +11,7 @@ import { DrawingCanvas } from "@/components/DrawingCanvas";
 import { GeneratingState } from "@/components/GeneratingState";
 import { PinnedDrawing } from "@/components/PinnedDrawing";
 import { RetryState } from "@/components/RetryState";
+import { StoryImageStack, type StoryImageStackItem } from "@/components/StoryImageStack";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { getBeatDefinition, STORY_BEATS } from "@/lib/beats";
 import { SEED_FINAL_BOOK, createSeedSession } from "@/lib/seed-data";
@@ -220,6 +221,7 @@ export function StoryCoachApp() {
           message={errorMessage || "Let's try that part again."}
           drawingImageUrl={currentBeatReferenceImage?.imageUrl}
           drawingImageAlt={currentBeatReferenceImage?.alt}
+          storyImages={currentBeatReferenceImage?.storyImages}
           posterLabel={currentBeatReferenceImage?.label}
           safeNote={currentBeatReferenceImage?.safeNote}
           onRetry={() => {
@@ -278,6 +280,7 @@ export function StoryCoachApp() {
           }
           drawingImageUrl={currentBeatReferenceImage?.imageUrl}
           drawingAlt={currentBeatReferenceImage?.alt}
+          storyImages={currentBeatReferenceImage?.storyImages}
           posterLabel={currentBeatReferenceImage?.label}
         />
       );
@@ -319,6 +322,7 @@ export function StoryCoachApp() {
         message="Go back and add the missing drawing or words."
         drawingImageUrl={currentBeatReferenceImage?.imageUrl}
         drawingImageAlt={currentBeatReferenceImage?.alt}
+        storyImages={currentBeatReferenceImage?.storyImages}
         posterLabel={currentBeatReferenceImage?.label}
         safeNote={currentBeatReferenceImage?.safeNote}
         onRetry={() => updateSession((current) => ({ ...current, currentStep: currentBeat.mode === "describe" ? "describe" : "draw" }))}
@@ -374,8 +378,9 @@ function getPreviousAcceptedImages(sourceSession: StorySessionState) {
 }
 
 type BeatReferenceImage = {
-  imageUrl: string;
-  alt: string;
+  imageUrl?: string;
+  alt?: string;
+  storyImages?: StoryImageStackItem[];
   label: string;
   safeNote: string;
 };
@@ -392,18 +397,21 @@ function getCurrentBeatReferenceImage(sourceSession: StorySessionState): BeatRef
     };
   }
 
-  const previousAcceptedBeat = [...sourceSession.beats]
+  const previousAcceptedBeats = sourceSession.beats
     .slice(0, sourceSession.currentBeatIndex)
-    .reverse()
-    .find((previousBeat) => previousBeat.accepted && previousBeat.generatedImageUrl);
+    .filter((previousBeat) => previousBeat.accepted && previousBeat.generatedImageUrl);
 
-  if (!previousAcceptedBeat?.generatedImageUrl) {
+  if (previousAcceptedBeats.length === 0) {
     return undefined;
   }
 
   return {
-    imageUrl: previousAcceptedBeat.generatedImageUrl,
+    imageUrl: previousAcceptedBeats.at(-1)?.generatedImageUrl,
     alt: "Story picture so far",
+    storyImages: previousAcceptedBeats.map((previousBeat) => ({
+      imageUrl: previousBeat.generatedImageUrl as string,
+      alt: `${getBeatDefinition(previousBeat.beatId)?.title ?? "Story"} picture`,
+    })),
     label: "Story so far",
     safeNote: "The story picture is still here.",
   };
@@ -435,7 +443,9 @@ function DescribeStep({ beat, prompt, helperText, nudges, referenceImage, onBack
         <div className="mt-8">
           {beat.drawingImageUrl ? (
             <PinnedDrawing imageUrl={beat.drawingImageUrl} caption="Your drawing" />
-          ) : referenceImage ? (
+          ) : referenceImage?.storyImages?.length ? (
+            <StoryImageStack images={referenceImage.storyImages} caption={referenceImage.label} />
+          ) : referenceImage?.imageUrl ? (
             <PinnedDrawing imageUrl={referenceImage.imageUrl} alt={referenceImage.alt} caption={referenceImage.label} />
           ) : (
             <div className="rounded-[24px] border-2 border-dashed border-[var(--border-paper)] bg-white/70 p-8 text-center text-xl font-black text-[var(--ink-soft)]">
