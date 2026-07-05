@@ -19,6 +19,7 @@ describe("STORY_BEATS", () => {
     expect(wantBeat).toMatchObject({
       mode: "describe",
       describePrompt: "What do they want most?",
+      describeHelperText: "Tell us what they are hoping for, why they want it, and how it would feel to get it.",
     });
     expect(wantBeat).not.toHaveProperty("drawPrompt");
   });

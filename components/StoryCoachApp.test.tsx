@@ -47,4 +47,23 @@ describe("StoryCoachApp", () => {
     expect(screen.queryByText("Beat 2: What Makes Them Special")).not.toBeInTheDocument();
     expect(screen.getAllByText("What Makes Them Special").length).toBeGreaterThan(0);
   });
+
+  it("explains what to talk about on describe-only story sections", async () => {
+    window.localStorage.setItem(
+      STORY_SESSION_STORAGE_KEY,
+      JSON.stringify({
+        ...createSeedSession(),
+        currentBeatIndex: 2,
+        currentStep: "describe",
+      }),
+    );
+
+    render(<StoryCoachApp />);
+
+    expect(await screen.findByText("What do they want most?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Tell us what they are hoping for, why they want it, and how it would feel to get it."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Use your voice or type it in. Messy details are welcome.")).not.toBeInTheDocument();
+  });
 });

@@ -254,6 +254,7 @@ export function StoryCoachApp() {
         <DescribeStep
           beat={currentBeat}
           prompt={currentDefinition.describePrompt ?? currentDefinition.title}
+          helperText={currentDefinition.describeHelperText}
           nudges={currentDefinition.nudges}
           referenceImage={currentBeatReferenceImage}
           onBackToDraw={
@@ -411,13 +412,14 @@ function getCurrentBeatReferenceImage(sourceSession: StorySessionState): BeatRef
 type DescribeStepProps = {
   beat: StoryBeatState;
   prompt: string;
+  helperText?: string;
   nudges: string[];
   referenceImage?: BeatReferenceImage;
   onBackToDraw?: () => void;
   onTranscript: (transcript: string) => void;
 };
 
-function DescribeStep({ beat, prompt, nudges, referenceImage, onBackToDraw, onTranscript }: DescribeStepProps) {
+function DescribeStep({ beat, prompt, helperText, nudges, referenceImage, onBackToDraw, onTranscript }: DescribeStepProps) {
   const beatDefinition = getBeatDefinition(beat.beatId);
 
   return (
@@ -428,7 +430,7 @@ function DescribeStep({ beat, prompt, nudges, referenceImage, onBackToDraw, onTr
         </div>
         <h1 className="mt-6 max-w-xl text-4xl font-black leading-[1.02] md:text-6xl">{prompt}</h1>
         <p className="mt-4 max-w-lg text-xl font-semibold leading-snug text-[var(--ink-soft)]">
-          Say it out loud or type it. Any idea can help.
+          {helperText ?? "Tell us the important story parts for this page."}
         </p>
         <div className="mt-8">
           {beat.drawingImageUrl ? (
