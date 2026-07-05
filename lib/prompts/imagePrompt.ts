@@ -76,8 +76,12 @@ function formatPreviousImages(previousAcceptedImages: PreviousAcceptedImageRefer
   }
 
   return previousAcceptedImages
-    .map((image, index) => `${index + 1}. beatId=${image.beatId}; imageUrl=${image.imageUrl}`)
+    .map((image, index) => `${index + 1}. Accepted illustration from the ${formatBeatLabel(image.beatId)} beat.`)
     .join("\n");
+}
+
+function formatBeatLabel(beatId: string): string {
+  return beatId.replace(/[-_]+/g, " ").trim() || "previous story";
 }
 
 function buildImageReferences(input: BuildImageGenerationPromptInput): ImagePromptReference[] {
@@ -110,6 +114,26 @@ function buildImageReferences(input: BuildImageGenerationPromptInput): ImageProm
   return references;
 }
 
+function formatAttachedReferences(imageReferences: ImagePromptReference[]): string {
+  if (imageReferences.length === 0) {
+    return "No images are attached.";
+  }
+
+  return imageReferences
+    .map((reference, index) => {
+      if (reference.kind === "drawing") {
+        return `${index + 1}. Child's current drawing for this beat.`;
+      }
+
+      if (reference.kind === "current_generated") {
+        return `${index + 1}. Current generated image for this beat, to revise.`;
+      }
+
+      return `${index + 1}. Previously accepted illustration from the ${formatBeatLabel(reference.beatId)} beat.`;
+    })
+    .join("\n");
+}
+
 export function isImageGenerationIntent(value: unknown): value is ImageGenerationIntent {
   return typeof value === "string" && IMAGE_GENERATION_INTENTS.includes(value as ImageGenerationIntent);
 }
@@ -129,15 +153,15 @@ export function buildImageGenerationPrompt(
     `Intent: ${input.intent}`,
     INTENT_INSTRUCTIONS[input.intent],
     "",
-    "Current beat raw artifacts:",
-    `- Beat id: ${input.beat.beatId}`,
-    `- Beat prompt: ${cleanText(input.beat.prompt)}`,
+    "Current storytelling input:",
+    `- Story prompt: ${cleanText(input.beat.prompt)}`,
     `- Child transcript: ${cleanText(input.beat.transcript)}`,
-    `- Drawing image: ${cleanText(input.beat.drawingImageUrl)}`,
-    `- Current generated image: ${cleanText(input.beat.generatedImageUrl)}`,
     "",
     "Correction transcripts:",
     formatCorrections(input.beat.correctionTranscripts),
+    "",
+    "Attached image references, in order:",
+    formatAttachedReferences(imageReferences),
     "",
     "Previous accepted image references:",
     formatPreviousImages(input.previousAcceptedImages),
