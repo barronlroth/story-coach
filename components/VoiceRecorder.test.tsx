@@ -25,5 +25,7 @@ describe("VoiceRecorder", () => {
 
     expect(await screen.findByText("Tell it your way. We'll use your favorite parts.")).toBeInTheDocument();
     expect(screen.queryByText("Ramble is okay. Story Coach will keep the good details.")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Use typed words" })).not.toBeInTheDocument();
   });
 });

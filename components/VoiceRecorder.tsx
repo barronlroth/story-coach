@@ -357,7 +357,7 @@ export function VoiceRecorder({
           className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--ink-primary)] px-5 py-3 text-base font-black text-white shadow-md disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Keyboard size={20} />
-          Use typed words
+          Submit
         </button>
       </div>
 
