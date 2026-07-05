@@ -39,6 +39,10 @@ export type CodexImageGenerationOptions = {
   env?: CodexAuthEnv;
 };
 
+const DEFAULT_IMAGE_REASONING_EFFORT = "none";
+const DEFAULT_IMAGE_SIZE = "1536x1024";
+const DEFAULT_IMAGE_QUALITY = "medium";
+
 function resolveResponseModel(env: CodexAuthEnv): string {
   return (
     env.STORY_COACH_CODEX_IMAGE_RESPONSE_MODEL?.trim() ||
@@ -46,6 +50,22 @@ function resolveResponseModel(env: CodexAuthEnv): string {
     env.CODEX_STORY_WRITER_MODEL?.trim() ||
     "gpt-5.4"
   );
+}
+
+function resolveImageReasoningEffort(env: CodexAuthEnv): string {
+  return (
+    env.STORY_COACH_CODEX_IMAGE_REASONING_EFFORT?.trim() ||
+    env.STORY_COACH_CODEX_REASONING_EFFORT?.trim() ||
+    DEFAULT_IMAGE_REASONING_EFFORT
+  );
+}
+
+function resolveImageSize(env: CodexAuthEnv): string {
+  return env.STORY_COACH_CODEX_IMAGE_SIZE?.trim() || DEFAULT_IMAGE_SIZE;
+}
+
+function resolveImageQuality(env: CodexAuthEnv): string {
+  return env.STORY_COACH_CODEX_IMAGE_QUALITY?.trim() || DEFAULT_IMAGE_QUALITY;
 }
 
 function buildProviderContent(
@@ -130,12 +150,20 @@ function buildCodexImagePayload(
   return {
     model: responseModel,
     store: false,
+    reasoning: {
+      effort: resolveImageReasoningEffort(env),
+    },
     tools: [
       {
         type: "image_generation",
         model: imageModel,
+        size: resolveImageSize(env),
+        quality: resolveImageQuality(env),
       },
     ],
+    tool_choice: {
+      type: "image_generation",
+    },
     input: [
       {
         role: "user",

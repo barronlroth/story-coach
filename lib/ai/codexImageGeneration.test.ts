@@ -46,8 +46,16 @@ describe("generateCodexImage", () => {
           {
             type: "image_generation",
             model: "gpt-image-test",
+            size: "1536x1024",
+            quality: "medium",
           },
         ],
+        reasoning: {
+          effort: "none",
+        },
+        tool_choice: {
+          type: "image_generation",
+        },
       }),
     );
     expect(createResponse.mock.calls[0][0]).not.toHaveProperty("metadata");
@@ -123,5 +131,47 @@ describe("generateCodexImage", () => {
     ).resolves.toEqual({
       imageUrl: "data:image/png;base64,iVBORw0KGgo-streamed",
     });
+  });
+
+  it("allows image size, quality, and wrapper reasoning to be configured", async () => {
+    const createResponse = vi.fn().mockResolvedValue({
+      image_b64: "iVBORw0KGgo-configured",
+    });
+
+    await generateCodexImage(
+      {
+        intent: "first_generation",
+        beat: {
+          beatId: "main-character",
+          prompt: "Draw your main character",
+          transcript: "Jesse is a friendly red dragon.",
+          correctionTranscripts: [],
+        },
+        previousAcceptedImages: [],
+      },
+      {
+        client: { createResponse },
+        env: {
+          STORY_COACH_CODEX_IMAGE_SIZE: "1024x1024",
+          STORY_COACH_CODEX_IMAGE_QUALITY: "low",
+          STORY_COACH_CODEX_IMAGE_REASONING_EFFORT: "low",
+        },
+      },
+    );
+
+    expect(createResponse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reasoning: {
+          effort: "low",
+        },
+        tools: [
+          expect.objectContaining({
+            type: "image_generation",
+            size: "1024x1024",
+            quality: "low",
+          }),
+        ],
+      }),
+    );
   });
 });
