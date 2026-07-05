@@ -296,7 +296,7 @@ export function VoiceRecorder({
           {status === "recording"
             ? "Tap stop when you are done."
             : recorderAvailable
-              ? "Ramble is okay. Story Coach will keep the good details."
+              ? "Tell it your way. We'll use your favorite parts."
               : "No microphone is available here, so typing is ready."}
         </p>
 

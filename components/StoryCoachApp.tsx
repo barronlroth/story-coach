@@ -428,7 +428,7 @@ function DescribeStep({ beat, prompt, nudges, referenceImage, onBackToDraw, onTr
         </div>
         <h1 className="mt-6 max-w-xl text-4xl font-black leading-[1.02] md:text-6xl">{prompt}</h1>
         <p className="mt-4 max-w-lg text-xl font-semibold leading-snug text-[var(--ink-soft)]">
-          Use your voice or type it in. Messy details are welcome.
+          Say it out loud or type it. Any idea can help.
         </p>
         <div className="mt-8">
           {beat.drawingImageUrl ? (
