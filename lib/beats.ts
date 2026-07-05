@@ -8,6 +8,8 @@ export type BeatDefinition = {
   describePrompt?: string;
   helperText?: string;
   describeHelperText?: string;
+  generatingTitle: string;
+  regeneratingTitle?: string;
   nudges: string[];
   requiresImage: boolean;
 };
@@ -20,6 +22,8 @@ export const STORY_BEATS: BeatDefinition[] = [
     drawPrompt: "Draw your main character",
     describePrompt: "Tell me about your character",
     describeHelperText: "Tell us their name, what kind of character they are, and one thing we should remember.",
+    generatingTitle: "Bringing them to life...",
+    regeneratingTitle: "Trying a new character...",
     nudges: ["What's their name?", "What are they?", "What should I remember?"],
     requiresImage: true,
   },
@@ -31,6 +35,8 @@ export const STORY_BEATS: BeatDefinition[] = [
     describePrompt: "Tell me what makes it special",
     helperText: "A power, a favorite thing, a secret, or a funny detail",
     describeHelperText: "Tell us what makes them special and how it helps, surprises, or gets them into trouble.",
+    generatingTitle: "Finding their sparkle...",
+    regeneratingTitle: "Finding fresh sparkle...",
     nudges: ["Is it a power?", "How does it help?", "Can it cause trouble?"],
     requiresImage: true,
   },
@@ -40,6 +46,8 @@ export const STORY_BEATS: BeatDefinition[] = [
     mode: "describe",
     describePrompt: "What do they want most?",
     describeHelperText: "Tell us what they are hoping for, why they want it, and how it would feel to get it.",
+    generatingTitle: "Imagining their dreams...",
+    regeneratingTitle: "Dreaming up another version...",
     nudges: ["What are they hoping for?", "Why does it matter?", "How would they feel?"],
     requiresImage: true,
   },
@@ -51,6 +59,8 @@ export const STORY_BEATS: BeatDefinition[] = [
     describePrompt: "Tell me about the problem",
     helperText: "A person, a place, a fear, or a tricky problem",
     describeHelperText: "Tell us what stops them, why it is hard, and whether it feels scary, silly, or tricky.",
+    generatingTitle: "Building the tricky part...",
+    regeneratingTitle: "Building a new tricky part...",
     nudges: ["What is stopping them?", "Why is it hard?", "Is it scary or tricky?"],
     requiresImage: true,
   },
@@ -62,6 +72,8 @@ export const STORY_BEATS: BeatDefinition[] = [
     describePrompt: "Tell me what they do",
     helperText: "What do they do to help?",
     describeHelperText: "Tell us what they try next, who helps, and whether their plan works.",
+    generatingTitle: "Trying their big idea...",
+    regeneratingTitle: "Trying another big idea...",
     nudges: ["What do they try?", "Does it work?", "What happens next?"],
     requiresImage: true,
   },
@@ -73,6 +85,8 @@ export const STORY_BEATS: BeatDefinition[] = [
     describePrompt: "Tell me how it ends",
     helperText: "Show what changed",
     describeHelperText: "Tell us how the story ends, how they feel, and what changed.",
+    generatingTitle: "Making the ending shine...",
+    regeneratingTitle: "Trying a new ending...",
     nudges: ["Did they get what they wanted?", "How do they feel?", "What changed?"],
     requiresImage: true,
   },

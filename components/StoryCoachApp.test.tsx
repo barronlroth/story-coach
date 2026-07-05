@@ -86,7 +86,8 @@ describe("StoryCoachApp", () => {
 
     render(<StoryCoachApp />);
 
-    expect(await screen.findByText("Making your picture...")).toBeInTheDocument();
+    expect(await screen.findByText("Imagining their dreams...")).toBeInTheDocument();
+    expect(screen.queryByText("Making your picture...")).not.toBeInTheDocument();
     expect(screen.getByAltText("Main Character picture")).toBeInTheDocument();
     expect(screen.getByAltText("What Makes Them Special picture")).toBeInTheDocument();
   });

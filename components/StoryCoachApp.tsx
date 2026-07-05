@@ -272,7 +272,11 @@ export function StoryCoachApp() {
     if (session.currentStep === "generating") {
       return (
         <GeneratingState
-          title={currentBeat.generatedImageUrl ? "Trying a new picture..." : "Making your picture..."}
+          title={
+            currentBeat.generatedImageUrl
+              ? currentDefinition.regeneratingTitle ?? "Trying a new picture..."
+              : currentDefinition.generatingTitle
+          }
           subtitle={
             currentBeat.drawingImageUrl
               ? "Using the drawing, words, and story so far"
