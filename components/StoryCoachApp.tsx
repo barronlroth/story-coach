@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpen, ChevronLeft, FileText, Paintbrush, RotateCcw, Sparkles } from "lucide-react";
+import { BookOpen, ChevronLeft, FileText, RotateCcw } from "lucide-react";
 import { AddDetailPanel } from "@/components/AddDetailPanel";
 import { BeatProgress } from "@/components/BeatProgress";
 import { BookBuilderState } from "@/components/BookBuilderState";
@@ -361,17 +361,6 @@ export function StoryCoachApp() {
         </header>
 
         <div className="flex flex-1 flex-col justify-center py-5 md:py-7">{renderStoryStep()}</div>
-
-        <footer className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] bg-[rgba(255,255,255,0.48)] px-4 py-3">
-          <div className="flex items-center gap-2 text-sm font-bold text-[var(--ink-soft)]">
-            <Paintbrush size={18} />
-            Draw first, describe second, generate third, confirm fourth.
-          </div>
-          <span className="inline-flex items-center gap-2 text-sm font-black text-[var(--ink-soft)]">
-            <Sparkles size={18} />
-            {currentBeat.beatId}
-          </span>
-        </footer>
       </section>
     </main>
   );
