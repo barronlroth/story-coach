@@ -299,7 +299,7 @@ export function StoryCoachApp() {
         <ConfirmationPanel
           generatedImageUrl={currentBeat.generatedImageUrl}
           drawingImageUrl={currentBeat.drawingImageUrl}
-          beatLabel={`Beat ${session.currentBeatIndex + 1}: ${currentDefinition.title}`}
+          beatLabel={currentDefinition.title}
           title={session.currentBeatIndex === session.beats.length - 1 ? "Ready to make your book?" : "Did I get it right?"}
           summaryTitle={currentDefinition.title}
           summaryText={currentBeat.transcript}
