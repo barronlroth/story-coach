@@ -56,7 +56,7 @@ export function AddDetailPanel({
         <div className="relative rotate-[-2deg]">
           <span className={cx(storyCoachTreatments.pin, "left-3 top-[-8px] z-20 bg-[var(--accent-leaf)]")} aria-hidden="true" />
           <div className={storyCoachTreatments.confirmationImageStage}>
-            <img src={generatedImageUrl} alt={generatedImageAlt} className="h-full w-full object-cover" />
+            <img src={generatedImageUrl} alt={generatedImageAlt} className="h-full w-full object-contain" />
           </div>
           <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">Generated image</p>
         </div>
@@ -65,7 +65,7 @@ export function AddDetailPanel({
           <div className="relative mx-auto w-full max-w-md rotate-[2deg]">
             <span className={cx(storyCoachTreatments.tapeStrip, "left-1/2 top-[-14px] z-20 -translate-x-1/2 rotate-[3deg]")} aria-hidden="true" />
             <div className={storyCoachTreatments.pinnedLandscapePaper}>
-              <img src={originalDrawingImageUrl} alt={originalDrawingAlt} className="h-full w-full object-cover" />
+              <img src={originalDrawingImageUrl} alt={originalDrawingAlt} className="h-full w-full object-contain" />
             </div>
             <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">Original drawing</p>
           </div>

@@ -34,7 +34,7 @@ export function GeneratingState({
         <span className={cx(storyCoachTreatments.pin, "left-5 top-[-10px] z-20 bg-[#2578d8]")} aria-hidden="true" />
         <div className={storyCoachTreatments.pinnedLandscapePaper}>
           {drawingImageUrl ? (
-            <img src={drawingImageUrl} alt={drawingAlt} className="h-full w-full object-cover" />
+            <img src={drawingImageUrl} alt={drawingAlt} className="h-full w-full object-contain" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-white text-lg font-black text-[var(--ink-soft)]">
               {posterLabel}

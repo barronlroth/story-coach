@@ -26,10 +26,10 @@ export function PageSpread({ pages, title }: PageSpreadProps) {
                 <img
                   src={page.imageUrl}
                   alt={`Illustration for page ${page.pageNumber}`}
-                  className="aspect-[4/3] w-full object-cover"
+                  className="aspect-[3/2] w-full object-contain"
                 />
               ) : (
-                <div className="flex aspect-[4/3] w-full items-center justify-center bg-[linear-gradient(135deg,rgba(246,201,76,0.18),rgba(131,200,242,0.22))] text-[var(--ink-soft)]">
+                <div className="flex aspect-[3/2] w-full items-center justify-center bg-[linear-gradient(135deg,rgba(246,201,76,0.18),rgba(131,200,242,0.22))] text-[var(--ink-soft)]">
                   <BookOpen size={52} aria-hidden="true" />
                 </div>
               )}

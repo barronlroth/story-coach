@@ -53,7 +53,7 @@ export function ConfirmationPanel({
         <div className="relative mt-6 rotate-[-2deg]">
           <span className={cx(storyCoachTreatments.tapeStrip, "left-5 top-[-14px] z-20 rotate-[-10deg]")} aria-hidden="true" />
           <div className={storyCoachTreatments.confirmationImageStage}>
-            <img src={generatedImageUrl} alt={generatedImageAlt} className="h-full w-full object-cover" />
+            <img src={generatedImageUrl} alt={generatedImageAlt} className="h-full w-full object-contain" />
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@ export function ConfirmationPanel({
             <span className={cx(storyCoachTreatments.pin, "left-3 top-[-8px] z-20 bg-[var(--accent-leaf)]")} aria-hidden="true" />
             <span className={cx(storyCoachTreatments.pin, "right-3 top-[-8px] z-20 bg-[var(--accent-coral)]")} aria-hidden="true" />
             <div className={storyCoachTreatments.pinnedLandscapePaper}>
-              <img src={drawingImageUrl} alt={drawingImageAlt} className="h-full w-full object-cover" />
+              <img src={drawingImageUrl} alt={drawingImageAlt} className="h-full w-full object-contain" />
             </div>
             <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">Your drawing</p>
           </div>

@@ -58,7 +58,7 @@ export const storyCoachTreatments = {
   pinnedLandscapePaper:
     "relative aspect-[16/9] overflow-hidden rounded-[18px] border-[6px] border-white bg-white shadow-[0_14px_28px_rgba(78,56,28,0.18)]",
   confirmationImageStage:
-    "relative aspect-[4/3] overflow-hidden rounded-[24px] border-[8px] border-white bg-white shadow-[0_18px_36px_rgba(78,56,28,0.2)]",
+    "relative aspect-[3/2] overflow-hidden rounded-[24px] border-[8px] border-white bg-white shadow-[0_18px_36px_rgba(78,56,28,0.2)]",
   tapeStrip:
     "absolute h-8 w-24 rounded-[6px] border border-white/30 bg-[rgba(131,200,242,0.58)] shadow-sm",
   pin:

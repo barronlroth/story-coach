@@ -77,7 +77,7 @@ export function RetryState({
           <span className={cx(storyCoachTreatments.pin, "right-3 top-[-8px] z-20 bg-[var(--accent-coral)]")} aria-hidden="true" />
           <div className={storyCoachTreatments.pinnedLandscapePaper}>
             {drawingImageUrl ? (
-              <img src={drawingImageUrl} alt={drawingImageAlt} className="h-full w-full object-cover" />
+              <img src={drawingImageUrl} alt={drawingImageAlt} className="h-full w-full object-contain" />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-white text-lg font-black text-[var(--ink-soft)]">
                 {posterLabel}
