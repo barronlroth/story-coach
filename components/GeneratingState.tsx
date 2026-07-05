@@ -6,6 +6,7 @@ type GeneratingStateProps = {
   subtitle?: string;
   drawingImageUrl?: string;
   drawingAlt?: string;
+  posterLabel?: string;
   note?: string;
   className?: string;
 };
@@ -15,6 +16,7 @@ export function GeneratingState({
   subtitle = "Using your drawing and your words",
   drawingImageUrl,
   drawingAlt = "Your drawing",
+  posterLabel = "Your drawing",
   note = "This may take a few seconds",
   className,
 }: GeneratingStateProps) {
@@ -35,10 +37,11 @@ export function GeneratingState({
             <img src={drawingImageUrl} alt={drawingAlt} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-white text-lg font-black text-[var(--ink-soft)]">
-              Your drawing
+              {posterLabel}
             </div>
           )}
         </div>
+        <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">{posterLabel}</p>
       </div>
 
       <div className="flex flex-col items-center justify-center text-center">

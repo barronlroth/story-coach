@@ -60,6 +60,7 @@ export function StoryCoachApp() {
 
   const currentBeat = getCurrentBeat(session);
   const currentDefinition = getCurrentBeatDefinition(session);
+  const currentBeatReferenceImage = getCurrentBeatReferenceImage(session);
   const completedBeatIds = useMemo(
     () => session.beats.filter((beat) => beat.accepted).map((beat) => beat.beatId),
     [session.beats],
@@ -217,7 +218,10 @@ export function StoryCoachApp() {
         <RetryState
           title="That part got stuck"
           message={errorMessage || "Let's try that part again."}
-          drawingImageUrl={currentBeat.drawingImageUrl}
+          drawingImageUrl={currentBeatReferenceImage?.imageUrl}
+          drawingImageAlt={currentBeatReferenceImage?.alt}
+          posterLabel={currentBeatReferenceImage?.label}
+          safeNote={currentBeatReferenceImage?.safeNote}
           onRetry={() => {
             setAppMode("story");
             if (currentBeat.generatedImageUrl) {
@@ -251,6 +255,7 @@ export function StoryCoachApp() {
           beat={currentBeat}
           prompt={currentDefinition.describePrompt ?? currentDefinition.title}
           nudges={currentDefinition.nudges}
+          referenceImage={currentBeatReferenceImage}
           onBackToDraw={
             currentBeat.mode === "describe"
               ? undefined
@@ -265,8 +270,14 @@ export function StoryCoachApp() {
       return (
         <GeneratingState
           title={currentBeat.generatedImageUrl ? "Trying a new picture..." : "Making your picture..."}
-          subtitle="Using the drawing, words, and story so far"
-          drawingImageUrl={currentBeat.drawingImageUrl}
+          subtitle={
+            currentBeat.drawingImageUrl
+              ? "Using the drawing, words, and story so far"
+              : "Using the words and story so far"
+          }
+          drawingImageUrl={currentBeatReferenceImage?.imageUrl}
+          drawingAlt={currentBeatReferenceImage?.alt}
+          posterLabel={currentBeatReferenceImage?.label}
         />
       );
     }
@@ -305,7 +316,10 @@ export function StoryCoachApp() {
       <RetryState
         title="This beat needs one more thing"
         message="Go back and add the missing drawing or words."
-        drawingImageUrl={currentBeat.drawingImageUrl}
+        drawingImageUrl={currentBeatReferenceImage?.imageUrl}
+        drawingImageAlt={currentBeatReferenceImage?.alt}
+        posterLabel={currentBeatReferenceImage?.label}
+        safeNote={currentBeatReferenceImage?.safeNote}
         onRetry={() => updateSession((current) => ({ ...current, currentStep: currentBeat.mode === "describe" ? "describe" : "draw" }))}
       />
     );
@@ -369,15 +383,52 @@ function getPreviousAcceptedImages(sourceSession: StorySessionState) {
     .map((beat) => ({ beatId: beat.beatId, imageUrl: beat.generatedImageUrl as string }));
 }
 
+type BeatReferenceImage = {
+  imageUrl: string;
+  alt: string;
+  label: string;
+  safeNote: string;
+};
+
+function getCurrentBeatReferenceImage(sourceSession: StorySessionState): BeatReferenceImage | undefined {
+  const beat = getCurrentBeat(sourceSession);
+
+  if (beat.drawingImageUrl) {
+    return {
+      imageUrl: beat.drawingImageUrl,
+      alt: "Your drawing",
+      label: "Your drawing",
+      safeNote: "Your drawing is still here.",
+    };
+  }
+
+  const previousAcceptedBeat = [...sourceSession.beats]
+    .slice(0, sourceSession.currentBeatIndex)
+    .reverse()
+    .find((previousBeat) => previousBeat.accepted && previousBeat.generatedImageUrl);
+
+  if (!previousAcceptedBeat?.generatedImageUrl) {
+    return undefined;
+  }
+
+  return {
+    imageUrl: previousAcceptedBeat.generatedImageUrl,
+    alt: "Story picture so far",
+    label: "Story so far",
+    safeNote: "The story picture is still here.",
+  };
+}
+
 type DescribeStepProps = {
   beat: StoryBeatState;
   prompt: string;
   nudges: string[];
+  referenceImage?: BeatReferenceImage;
   onBackToDraw?: () => void;
   onTranscript: (transcript: string) => void;
 };
 
-function DescribeStep({ beat, prompt, nudges, onBackToDraw, onTranscript }: DescribeStepProps) {
+function DescribeStep({ beat, prompt, nudges, referenceImage, onBackToDraw, onTranscript }: DescribeStepProps) {
   const beatDefinition = getBeatDefinition(beat.beatId);
 
   return (
@@ -393,6 +444,8 @@ function DescribeStep({ beat, prompt, nudges, onBackToDraw, onTranscript }: Desc
         <div className="mt-8">
           {beat.drawingImageUrl ? (
             <PinnedDrawing imageUrl={beat.drawingImageUrl} caption="Your drawing" />
+          ) : referenceImage ? (
+            <PinnedDrawing imageUrl={referenceImage.imageUrl} alt={referenceImage.alt} caption={referenceImage.label} />
           ) : (
             <div className="rounded-[24px] border-2 border-dashed border-[var(--border-paper)] bg-white/70 p-8 text-center text-xl font-black text-[var(--ink-soft)]">
               No drawing for this part. Just tell the story.

@@ -8,6 +8,7 @@ type RetryStateProps = {
   message?: string;
   drawingImageUrl?: string;
   drawingImageAlt?: string;
+  posterLabel?: string;
   safeNote?: string;
   retryLabel?: string;
   goBackLabel?: string;
@@ -22,6 +23,7 @@ export function RetryState({
   message = "Let's try that part again",
   drawingImageUrl,
   drawingImageAlt = "Your drawing",
+  posterLabel = "Your drawing",
   safeNote = "Your drawing is still here.",
   retryLabel = "Try again",
   goBackLabel = "Go back",
@@ -78,11 +80,11 @@ export function RetryState({
               <img src={drawingImageUrl} alt={drawingImageAlt} className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-white text-lg font-black text-[var(--ink-soft)]">
-                Your drawing
+                {posterLabel}
               </div>
             )}
           </div>
-          <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">Your drawing</p>
+          <p className="mt-3 text-center text-base font-extrabold text-[var(--ink-soft)]">{posterLabel}</p>
         </div>
       </div>
     </section>
